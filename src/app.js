@@ -20,7 +20,15 @@ import categoryRoutes from "./routes/category.routes.js";
 import sellerRoutes from "./routes/seller.routes.js";
 
 const app = express();
-
+/* CORS */
+app.use(
+  cors({
+    origin: "https://frontend-phi-orcin-16.vercel.app",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE","OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 /* Security */
 app.use(helmet());
 
@@ -36,16 +44,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-/* CORS */
-app.use(
-  cors({
-    origin: "https://frontend-phi-orcin-16.vercel.app",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE","OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 
 /* Logging */
 if (process.env.NODE_ENV === "development") {
@@ -81,6 +79,7 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+
 
 
 
