@@ -30,11 +30,15 @@ export const register = async (req, res, next) => {
       otpExpiry: Date.now() + 10 * 60 * 1000,
     });
 
-    await sendEmail({
-      to: email,
-      subject: "Verify your email",
-      html: `<h3>Your OTP is ${otp}</h3>`,
-    });
+    try {
+  await sendEmail({
+    to: email,
+    subject: "Verify your email",
+    html: `<h3>Your OTP is ${otp}</h3>`,
+  });
+} catch (err) {
+  console.error("Email failed:", err.message);
+}
 
     res.status(201).json({
       success: true,
@@ -121,3 +125,4 @@ export const logout = (req, res) => {
   res.cookie("token", "", { maxAge: 0 });
   res.json({ success: true, message: "Logged out" });
 };
+
