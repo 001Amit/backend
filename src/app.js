@@ -40,7 +40,7 @@ app.use(cookieParser());
 /* CORS */
 app.use(
   cors({
-    origin:[ "http://localhost:5173",
+    origin:[ "http://localhost:5000",
       "https://frontend-alpha-six-62.vercel.app",
     ],
     credentials: true,
@@ -83,3 +83,4 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+
