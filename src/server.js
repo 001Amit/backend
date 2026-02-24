@@ -7,6 +7,8 @@ import connectDB from "./config/db.js";
 import initSocket from "./config/socket.js";
 
 const server = http.createServer(app);
+/* -------------------- TRUST PROXY (IMPORTANT FOR RENDER) -------------------- */
+app.set("trust proxy", 1);
 
 /* -------------------- DATABASE -------------------- */
 connectDB();
@@ -20,4 +22,5 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
