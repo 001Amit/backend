@@ -1,16 +1,10 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS, // Gmail App Password
-    },
-  });
-
-  await transporter.sendMail({
-    from: `"E-Commerce" <${process.env.SMTP_USER}>`,
+  await resend.emails.send({
+    from: "onboarding@resend.dev", // temporary test domain
     to,
     subject,
     html,
