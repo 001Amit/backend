@@ -40,9 +40,7 @@ app.use(cookieParser());
 /* CORS */
 app.use(
   cors({
-    origin:[ 
-      "https://frontend-phi-orcin-16.vercel.app",
-    ],
+    origin: "https://frontend-phi-orcin-16.vercel.app",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE","OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -83,5 +81,6 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+
 
 
