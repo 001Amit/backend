@@ -12,7 +12,8 @@ app.set("trust proxy", 1);
 
 /* -------------------- DATABASE -------------------- */
 connectDB();
-
+console.log("Connected to DB:", mongoose.connection.name);
+console.log("Mongo URI:", process.env.MONGO_URI);
 /* -------------------- SOCKET -------------------- */
 initSocket(server);
 
@@ -22,5 +23,6 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 
