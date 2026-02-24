@@ -18,6 +18,6 @@ initSocket(server);
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log("Cloudinary key:", process.env.CLOUDINARY_API_KEY);
   console.log(`Server running on port ${PORT}`);
 });
+
