@@ -23,7 +23,7 @@ const app = express();
 /* CORS */
 app.use(
   cors({
-    origin:"https://deailyneedscarts.com" 
+    origin:"https://deailyneedscarts.com", 
       "https://www.deailyneedscarts.com",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE","OPTIONS"],
@@ -80,6 +80,7 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
+
 
 
 
