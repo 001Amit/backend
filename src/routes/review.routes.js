@@ -5,6 +5,8 @@ import upload from "../utils/uploadToCloudinary.js";
 import {
   addReview,
   getReviews,
+  canReviewProduct
+
 } from "../controllers/review.controller.js";
 
 const router = express.Router();
@@ -16,6 +18,7 @@ router.post(
   upload.array("images", 3),
   addReview
 );
+router.get("/can-review/:productId", protect, canReviewProduct);
 
 router.get("/:productId", getReviews);
 
