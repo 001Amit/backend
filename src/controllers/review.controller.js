@@ -109,3 +109,40 @@ export const getReviews = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch reviews" });
   }
 };
+
+/* CHECK IF USER CAN REVIEW PRODUCT */
+export const canReviewProduct = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const productObjectId = new mongoose.Types.ObjectId(productId);
+
+    const order = await Order.findOne({
+      user: req.user._id,
+      items: {
+        $elemMatch: {
+          product: productObjectId,
+          status: "DELIVERED",
+        },
+      },
+    });
+
+    if (!order) {
+      return res.json({ canReview: false });
+    }
+
+    const alreadyReviewed = await Review.findOne({
+      user: req.user._id,
+      product: productObjectId,
+    });
+
+    if (alreadyReviewed) {
+      return res.json({ canReview: false });
+    }
+
+    res.json({ canReview: true });
+
+  } catch (error) {
+    console.error("CAN REVIEW ERROR:", error);
+    res.status(500).json({ message: "Failed to check review eligibility" });
+  }
+};
