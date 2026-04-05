@@ -59,41 +59,68 @@ export const createProduct = async (req, res, next) => {
    GET ALL PRODUCTS (PUBLIC)
 ====================================================== */
 export const getProducts = async (req, res) => {
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 8;
-  const skip = (page - 1) * limit;
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 8;
+    const skip = (page - 1) * limit;
 
-  const keyword = req.query.keyword
-    ? {
-        name: {
-          $regex: req.query.keyword,
-          $options: "i", // case-insensitive
-        },
-      }
-    : {};
+    const { keyword, category, sort, min, max } = req.query;
 
-  const filter = {
-    isActive: true,
-    ...keyword,
-  };
+    let query = {
+      isActive: true,
+    };
 
-  const total = await Product.countDocuments(filter);
+    /* 🔍 KEYWORD SEARCH */
+    if (keyword) {
+      query.name = {
+        $regex: keyword,
+        $options: "i",
+      };
+    }
 
-  const products = await Product.find(filter)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+    /* 📂 CATEGORY FILTER */
+    if (category) {
+      query.category = category;
+    }
 
-  res.json({
-    success: true,
-    products,
-    pagination: {
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      limit,
-    },
-  });
+    /* 💰 PRICE FILTER (VARIANT SUPPORT) */
+    if (min || max) {
+      query["variants.price"] = {
+        $gte: Number(min) || 0,
+        $lte: Number(max) || 1000000,
+      };
+    }
+
+    /* 🔥 SORTING */
+    let sortOption = { createdAt: -1 }; // default
+
+    if (sort) {
+      if (sort === "price") sortOption = { "variants.price": 1 };
+      if (sort === "-price") sortOption = { "variants.price": -1 };
+      if (sort === "-rating") sortOption = { rating: -1 };
+      if (sort === "-createdAt") sortOption = { createdAt: -1 };
+    }
+
+    const total = await Product.countDocuments(query);
+
+    const products = await Product.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      success: true,
+      products,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+        limit,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 /* ======================================================
