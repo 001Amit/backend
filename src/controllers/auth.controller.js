@@ -125,3 +125,61 @@ export const logout = (req, res) => {
   res.cookie("token", "", { maxAge: 0 });
   res.json({ success: true, message: "Logged out" });
 };
+
+
+/* forget pass */
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  user.resetOTP = otp;
+  user.resetOTPExpire = Date.now() + 10 * 60 * 1000; // 10 min
+  await user.save();
+
+  // 👉 send email (use nodemailer)
+  console.log("OTP:", otp); // temp (for testing)
+
+  res.json({ success: true, message: "OTP sent" });
+};
+
+/* verify otp */
+export const verifyResetOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({
+    email,
+    resetOTP: otp,
+    resetOTPExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res.status(400).json({ message: "Invalid or expired OTP" });
+  }
+
+  res.json({ success: true });
+};
+
+
+
+/* reset pass */
+import bcrypt from "bcryptjs";
+
+export const resetPassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  user.password = await bcrypt.hash(password, 10);
+
+  user.resetOTP = undefined;
+  user.resetOTPExpire = undefined;
+
+  await user.save();
+
+  res.json({ success: true, message: "Password updated" });
+};
