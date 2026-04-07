@@ -131,60 +131,87 @@ export const logout = (req, res) => {
   res.json({ success: true, message: "Logged out" });
 };
 
-
 /* forget pass */
-export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: "User not found" });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = generateOTP();
 
-  user.resetOTP = otp;
-  user.resetOTPExpire = Date.now() + 10 * 60 * 1000; // 10 min
-  await user.save();
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
+    await user.save();
 
-  // 👉 send email (use nodemailer)
-  console.log("OTP:", otp); // temp (for testing)
+    // 🔥 SEND EMAIL (RESEND)
+    await sendEmail({
+      to: email,
+      subject: "Password Reset OTP",
+      html: `<h3>Your OTP is <b>${otp}</b></h3>`,
+    });
 
-  res.json({ success: true, message: "OTP sent" });
+    res.json({
+      success: true,
+      message: "OTP sent to email",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 /* verify otp */
-export const verifyResetOTP = async (req, res) => {
-  const { email, otp } = req.body;
+export const verifyResetOTP = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
 
-  const user = await User.findOne({
-    email,
-    resetOTP: otp,
-    resetOTPExpire: { $gt: Date.now() },
-  });
+    const user = await User.findOne({ email, otp });
 
-  if (!user) {
-    return res.status(400).json({ message: "Invalid or expired OTP" });
+    if (!user || user.otpExpiry < Date.now()) {
+      return res.status(400).json({
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "OTP verified",
+    });
+  } catch (error) {
+    next(error);
   }
-
-  res.json({ success: true });
 };
 
 
 
 /* reset pass */
-import bcrypt from "bcryptjs";
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-export const resetPassword = async (req, res) => {
-  const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-  user.password = await bcrypt.hash(password, 10);
+    // 🔥 Update password (auto hashed via pre-save)
+    user.password = password;
 
-  user.resetOTP = undefined;
-  user.resetOTPExpire = undefined;
+    // 🔥 clear OTP
+    user.otp = undefined;
+    user.otpExpiry = undefined;
 
-  await user.save();
+    await user.save();
 
-  res.json({ success: true, message: "Password updated" });
+    res.json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
