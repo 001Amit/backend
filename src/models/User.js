@@ -34,11 +34,9 @@ const userSchema = new mongoose.Schema(
     isApproved: { type: Boolean, default: false },
     isBanned: { type: Boolean, default: false },
 
+    // 🔥 OTP (used for both verify + reset)
     otp: String,
     otpExpiry: Date,
-
-    resetPasswordToken: String,
-    resetPasswordExpiry: Date,
   },
   { timestamps: true }
 );
@@ -48,7 +46,6 @@ userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
-
 
 /* Compare password */
 userSchema.methods.comparePassword = async function (password) {
