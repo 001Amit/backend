@@ -1,3 +1,4 @@
+
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import generateOTP from "../utils/generateOTP.js";
@@ -100,8 +101,8 @@ export const login = async (req, res, next) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      secure: true,        // FORCE TRUE
+      sameSite: "none",    // REQUIRED for cross-site
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
