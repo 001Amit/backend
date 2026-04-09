@@ -64,6 +64,26 @@ export const getCategories = async (req, res) => {
     },
   });
 };
+
+export const getCategoryById = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      category,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 /* UPDATE (ADMIN) */
 export const updateCategory = async (req, res) => {
   const { name } = req.body;
