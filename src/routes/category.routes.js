@@ -7,6 +7,7 @@ import {
   updateCategory,
   deleteCategory,
   getAllCategories,
+  getProductsByCategory,
   getCategoryById
 } from "../controllers/category.controller.js";
 
@@ -15,6 +16,7 @@ const router = express.Router();
 /* Public */
 router.get("/", getCategories);
 router.get("/all", getAllCategories); 
+router.get("/:id/products", getProductsByCategory);
 router.get("/:id", getCategoryById);
 /* Admin */
 router.post("/", protect, authorize("admin"), createCategory);
