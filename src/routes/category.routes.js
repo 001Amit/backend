@@ -6,7 +6,7 @@ import {
   getCategories,
   updateCategory,
   deleteCategory,
-  getAllCategories.
+  getAllCategories,
   getCategoryById
 } from "../controllers/category.controller.js";
 
