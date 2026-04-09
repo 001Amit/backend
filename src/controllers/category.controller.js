@@ -84,6 +84,68 @@ export const getCategoryById = async (req, res) => {
   }
 };
 
+/* ======================================================
+   GET PRODUCTS BY CATEGORY
+====================================================== */
+export const getProductsByCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      keyword,
+      minPrice,
+      maxPrice,
+      sort,
+    } = req.query;
+
+    // 🔍 Base filter
+    let query = {
+      category: id,
+      isActive: true,
+    };
+
+    // 🔎 Search inside category
+    if (keyword) {
+      query.name = {
+        $regex: keyword,
+        $options: "i",
+      };
+    }
+
+    // 💰 Price filter (using base price or variant)
+    if (minPrice || maxPrice) {
+      query.price = {};
+
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    let productsQuery = Product.find(query);
+
+    // 🔽 Sorting
+    if (sort === "price_asc") {
+      productsQuery = productsQuery.sort({ price: 1 });
+    } else if (sort === "price_desc") {
+      productsQuery = productsQuery.sort({ price: -1 });
+    } else {
+      productsQuery = productsQuery.sort({ createdAt: -1 });
+    }
+
+    const products = await productsQuery;
+
+    res.json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    console.error("Category Products Error:", error);
+    res.status(500).json({
+      message: "Failed to fetch category products",
+    });
+  }
+};
+
 /* UPDATE (ADMIN) */
 export const updateCategory = async (req, res) => {
   const { name } = req.body;
